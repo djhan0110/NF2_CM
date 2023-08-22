@@ -1,6 +1,6 @@
 # Set working environment -------------------------------------------------
 rm(list = ls())
-setwd("C:/Workspace/R/Project/NF2_CM")
+#setwd("C:/Workspace/R/Project/NF2_CM")
 
 # Load libraries ----------------------------------------------------------
 library(readr)
