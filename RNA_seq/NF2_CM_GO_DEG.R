@@ -1,5 +1,6 @@
 # Set working environment -------------------------------------------------
 rm(list = ls())
+current_path <- getwd()
 #setwd("C:/Workspace/R/Project/NF2_CM")
 
 # Load libraries ----------------------------------------------------------
@@ -15,14 +16,14 @@ library(seriation)
 library(gridExtra)
 
 # Load result -------------------------------------------------------------
-GOIDs <- read.table("Rawdata/GOIDs_NF2_CM_iPSC.txt", header = T, colClasses = "character")
+GOIDs <- read.table(paste0(current_path, "/RNA_seq/Rawdata/GOIDs_NF2_CM_iPSC.txt"), header = T, colClasses = "character")
 GOIDs$IDs <- paste0("GO:", GOIDs$IDs)
 anno_GO <- AnnotationDbi::select(GO.db, keys = GOIDs$ID, keytype = "GOID",  columns = "TERM") %>% 
   mutate(TERM = str_to_sentence(TERM))
 ret_genes <- AnnotationDbi::select(org.Hs.eg.db, keys = anno_GO$GOID, keytype = "GOALL",  columns=c("ENSEMBL", "SYMBOL"))
 GO_genes <- left_join(ret_genes, anno_GO, by = c("GOALL" = "GOID"))
 
-LFC_NF2_CM_iPSC <- read_csv("Export/LFC_NF2_CM_iPSC.csv")
+LFC_NF2_CM_iPSC <- read_csv(paste0(current_path, "/RNA_seq/Export/LFC_NF2_CM_iPSC.csv"))
 LFC <- as.data.frame(janitor::clean_names(LFC_NF2_CM_iPSC)) %>% 
   mutate(nlogpadj = -log10(padj),
          attr = ifelse(padj < 0.05 & log2fold_change > 1, "up",
@@ -32,7 +33,7 @@ filtered_LFC <- LFC %>%
 table(LFC$attr)
 table(filtered_LFC$attr)
 
-VST_NF2_CM_iPSC <- read_csv("Export/VST_NF2_CM_iPSC.csv")
+VST_NF2_CM_iPSC <- read_csv(paste0(current_path, "/RNA_seq/Export/VST_NF2_CM_iPSC.csv"))
 VST <- as.data.frame(janitor::clean_names(VST_NF2_CM_iPSC)) %>% 
   left_join(LFC %>% dplyr::select(x1, log2fold_change, padj, nlogpadj, attr), by = "x1") %>% 
   na.omit()
@@ -119,7 +120,7 @@ draw(hm_1 + hm_2, auto_adjust = FALSE, ht_gap = unit(c(1, 0), "mm"))
 # anno_txt <- textbox_grob(anno_GO, gp = gpar(fontsize = 8))
 # grid.draw(anno_txt)
 
-tiff(file = "Figure/HM_DEGO_NF2_CM.tiff", res = 300, width = 4.3, height = 4.3, units = "in")
+tiff(file = paste0(current_path, "/RNA_seq/Figure/NF2_CM_GO_DEG_HM.tiff"), res = 300, width = 4.3, height = 4.3, units = "in")
 draw(hm_1 + hm_2, auto_adjust = FALSE, ht_gap = unit(c(1, 0), "mm"))
 dev.off()
 
